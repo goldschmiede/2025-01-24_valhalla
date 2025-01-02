@@ -1,0 +1,8 @@
+== Zeitplan
+
+|===
+|Beginn|09:00 Uhr
+|Kaffeepause|ca. 10:30 Uhr
+|Mittagspause|12:00 bis 13:00 Uhr
+|Ende|16:00 Uhr
+|===

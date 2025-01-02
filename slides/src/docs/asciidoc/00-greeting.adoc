@@ -1,0 +1,11 @@
+:speaker: {revealjs_speaker}
+:jobtitle: {revealjs_speaker_jobtitle}
+:date: {revealjs_date}
+:promoter: {revealjs_promoter}
+:imagesdir: images
+:space:
+
+// Nicht gewünschtes auskommentieren
+include::{basedir}/generated-src/speaker.adoc[]
+
+include::{basedir}/generated-src/anderScore1Slide.adoc[]

@@ -1,0 +1,12 @@
+== Ihre Umgebung (Beispiel aus der Quarkus Schulung)
+
+* OpenJDK 11
+* Apache Maven
+* Gradle
+* GraalVM Community Edition
+* NodeJS
+* IntelliJ Community Edition
+* Docker Community Edition
+* Minikube
+* Postman
+* Git

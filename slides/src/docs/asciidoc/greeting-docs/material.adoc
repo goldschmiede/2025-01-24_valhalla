@@ -1,0 +1,10 @@
+== Material (Beispiel aus der Quarkus Schulung)
+
+* Quarkus Guides +
+https://quarkus.io/guides
+
+* Quarkus Cheatsheet(s) +
+https://lordofthejars.github.io/quarkus-cheat-sheet
+
+* GitHub QuarkusIO +
+https://github.com/quarkusio/quarkus

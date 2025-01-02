@@ -1,0 +1,62 @@
+:title: {revealjs_title}
+:description: description
+:backend: revealjs
+:author: {revealjs_speaker}
+:imagesdir: images
+
+== Motivation
+
+Speicher-Layout in Java:
+
+image::article/xy-points.png[]
+
+[.step]
+* 1990 (als die JVM designed wurde): Speicherzugriff so teuer wie add
+* Heute (cache-miss):  1000x teurer +
+  (mehrstufige Caches, parallelisierung von Instruktionen)
+* Speicher-Layouts mit vielen Pointern passen nicht zu aktueller Hardware
+
+[.columns]
+== Ziel
+
+image::article/flattened-points.png[]
+
+* flacher (keine Indirektion) -> cache-efficient
+* dichter (keine Header) -> memory-efficient
+
+== Valhalla
+
+*Hintergrund:*
+
+* Inline-Daten
+* Seit 2014 (tatsächlich sollten value types schon Bestandteil der 1. Sparchversion sein)
+* Artikel https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background[State of Valhalla], von Brian Goetz, Dez. 2021
+
+*Ziele:*
+
+* Flacheres und dichteres Speicherlayout
+* Keine Kompromisse bei Abstraktion und Typsicherheit
+* Nicht nur _Flattening_ im Speicher, sondern auch bei der Parameterübergabe: +
+  2 ints statt ein Pointer auf Point
+
+== Ist-Situation bei Java
+
+[.step]
+* Zwei unterschiedliche Typsysteme: Primitive und Objekte
+* Duplizierung vieler API's für Primitive
+* Arrays von Primitiven sind anders
+* Keine Generics mit primitiven Typen => viele _functional Interfaces_, wie `IntPredicate`
+* Problem beim Boxing/Unboxing: Identitiät geht verloren, NPEs, +
+  Performancekosten bei Dereferenzierung
+* Libraries (Collections, Streams) nicht per se für Primitive geeigenet
+
+== Das Gleiche vs. das Selbe
+
+== Quellen
+
+* Story (3 Teile): https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background
+* Projekt: https://openjdk.org/projects/valhalla/
+* JDK: https://jdk.java.net/valhalla/
+* JEP Overview: https://openjdk.org/jeps/0
+* Value Classes and Objects: https://openjdk.org/jeps/401
+* Enhanced Primitive Boxing: https://openjdk.org/jeps/402

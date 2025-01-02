@@ -1,0 +1,28 @@
+== Remote Training
+
+* Video-Konferenz über Zoom
+** Bildschirmfreigabe für Folien
+** Breakout Rooms für Übungen
+** Lautsprecher + Mikrofon benötigt, Kamera empfehlenswert
+* Entwicklung: Remote Desktop Protocol (RDP)
+** Praktische Übungen
+** Ubuntu VM 
+** Aufschaltung über Zoom möglich
+** Kennwort für Benutzer **student**: `miro`
+* Material auf GitHub
+
+
+=== Vereinbarungen
+
+* Pausen
+** Gemeinsam zu vorgegebenen Zeiten
+** Individuell während der Übungen
+* Erreichbarkeit Dozent
+** Zoom (Chat, Mikrofon)
+** E-Mail
+** Handy
+** Kamera aus: gerade nicht anwesend bzw. ansprechbar
+* Regeln
+** Mikrofon möglichst aus (Hintergrundgeräusche)
+** Bei Fragen: "Hand heben" oder Chat
+** Wenn Übung fertig, selbst in Hauptsession zurückkehren

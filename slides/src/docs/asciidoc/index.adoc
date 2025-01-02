@@ -1,0 +1,19 @@
+:title: {revealjs_title}
+:description: description
+:backend: revealjs
+:author: {revealjs_speaker}
+:revealjs_theme: default
+:linkattrs:
+:idprefix:
+:imagesdir: images
+:date: {revealjs_date}
+
+== Agenda
+
+include::teaser.adoc[]
+
+include::00-greeting.adoc[]
+
+include::01-intro.adoc[]
+
+

@@ -1,0 +1,22 @@
+:imagesdir: images
+:speaker: {revealjs_speaker}
+:title: {revealjs_title}
+
+[state=no-title-footer]
+== {title}
+
+[.text-center]
+--
+// FIXME Untertitel ändern
+**C-Performance mit Java**
+
+// FIXME Titelbild hinzufügen
+image::anderScore/anderscore-white.jpg[height=200]
+
+// FIXME Welche Veranstaltung, wo wird sie gehalten?
+Goldschmiede
+
+{date}, {author}
+--
+
+include::agenda.adoc[]

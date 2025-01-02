@@ -1,0 +1,39 @@
+[state=no-title-footer]
+== Valhalla
+
+[.center]
+Goldschmiede
+
+== Links
+
+* Projekt: https://openjdk.org/projects/valhalla/
+* JDK: https://jdk.java.net/valhalla/
+* JEP Overview: https://openjdk.org/jeps/0
+* Value Classes and Objects: https://openjdk.org/jeps/401
+* Enhanced Primitive Boxing: https://openjdk.org/jeps/402
+* Story (3 Teile): https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background
+
+== Agenda
+
+* Motivation: In-Line-Daten, flacher, seit 2014
+* Kosten von Objekten: Heap, Heap, Zugriff über Pointer
+* Bild: Points
+* Seit 1990: Speicherzugriff so teuer wie add, heute 1000x so teuer
+* Ziel: flach (cache-efficient) und dense (memory-efficient), ohne Kompromisse bei Abstraktion und Typsicherheit
+* Ziel: Points inline
+* Nicht nur flattening im Speicher sondern auch bei der Parameterübergabe: zwei ints statt ein Pointer auf Point
+* Nachteile von 2 unterschiedlichen Typsystemen: Primitive sind keine Objekte: Duplizierung der API's für Primitive,
+* Arrays von Primitiven sind was anderes
+* Problem: Generics mit primitiven Typen, viele functional interfaces, wie IntPredicate ...
+* Problem beim Boxing/Unboxing: Identitiät geht verloren, NPEs, Performance bei Dereferenzierung
+* Problem: Libraries nicht für Primitive geeigenet
+* Das Gleiche vs. das Selbe
+* Problem: Identität bei In-Line-Daten (Kopieren eine Arrays mit Pointern vs. Array mit Inhalt und Vergleich von Array-Elementen)
+* ...
+* Gegenwart: primitive Typen (int, ...), primitive Klassen (Integer, ...)
+* String-Konstanten (inline)
+* Integer.valueOf() statt Konstruktor (Warnung seit Java 16)
+* value record vs. record
+* Initializer-Code im Konstruktor vor Aufruf von super()
+* Normale Initialisierungsreihenfolge im Konstruktur und Problem beim Aufruf von (überladenen Methoden)
+* Problem bei Initialisierung (Felder müssen final befüllt sein, bevor super() aufgerufen wird)

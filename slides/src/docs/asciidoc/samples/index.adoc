@@ -1,0 +1,28 @@
+:title: {revealjs_title}
+:description: description
+:backend: revealjs
+:author: {revealjs_speaker}
+:revealjs_theme: default
+:linkattrs:
+:idprefix:
+:imagesdir: images
+:date: {revealjs_date}
+
+== Start
+
+link:valhalla.html[Valhalla]
+
+include::teaser.adoc[]
+
+include::00-greeting.adoc[]
+
+include::01-intro.adoc[]
+
+include::02-oneMoreChapter.adoc[]
+
+
+// Samlpes (Auskommentieren oder Entfernen vor Veröffentlichung)
+
+include::samples-anderscore.adoc[]
+
+include::samples-revealjs.adoc[]
