@@ -1,11 +1,12 @@
 == Agenda
 
-link:00-greeting.html[Begrüßung]
-
-. link:01-intro.html[Einführung]
+link:valhalla.html[Stoffsammlung]
 
 +++
 <hr />
 +++
 
-link:valhalla.html[Stoffsammlung]
+link:00-greeting.html[Begrüßung]
+
+. link:01-intro.html[Einführung]
+

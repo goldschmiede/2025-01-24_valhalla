@@ -4,7 +4,40 @@
 :author: {revealjs_speaker}
 :imagesdir: images
 
-== Motivation
+== Java-Projekte
+
+[cols="1,4"]
+|===
+|Projekt|Thema
+
+|Loom|Virtual Threads
+|Valhalla|Value Objects
+|Panama|Verknüpfung mit nativem Code
+|Amber|Diverse kleinere Features (Pattern Matching, Textblocks)
+|Coin|Kleinere Features für Java 7
+|Graal|Ahead-of-time Compiler
+|Jigsaw|Module in Java 9, modularisiertes JDK
+|Skara|Umzug nach https://github.com/openjdk/jdk.git[GitHub]
+|===
+
+Siehe auch https://blogs.oracle.com/javamagazine/post/java-project-amber-lambda-loom-panama-valhalla[Major named Java projects].
+
+== Der Name 'Valhalla'
+
+Valhalla ist ein Konzept aus der nordischen Mythologie und bedeutet wörtlich 
+„Halle der Gefallenen“. 
+
+Valhalla ist der Ort, an dem tapfere Krieger nach ihrem Tod aufgenommen werden, 
+wenn sie ehrenvoll auf dem Schlachtfeld gestorben sind. 
+Die Walküren, mythologische Kriegerinnen, wählen diese
+Helden aus und bringen sie nach Valhalla.
+
+Die Krieger sind höchstwahrscheinlich über die Verwendung spitzer Gegenstände
+(Englisch: pointy things, also Pointers) dorthin gekommen. Daher der Name. 
+
+(Frei nach ChatGPT...)
+
+== "Pointy things" in Java
 
 Speicher-Layout in Java:
 
@@ -23,6 +56,17 @@ image::article/flattened-points.png[]
 
 * flacher (keine Indirektion) -> cache-efficient
 * dichter (keine Header) -> memory-efficient
+
+== Speicherzugriffe heute und damals
+
+* In den frühen 1990igern, als die JVM designed wurde, dauerte ein Speicherzugriff
+  in etwa genauso lang, wie die Ausführung einer Operation (z. B. Addition).
+* Heute, mit mehrstufigen Caches und Parallelisierung einzelner Instruktionen,
+  kann ein einzelner Cache-Miss solange dauern, wie die Ausführung von
+  1000 Operationen.
+* Speicherlayouts mit vielen Zeigern sind daher für heute Hardware 
+  nicht ideal.
+* Neben dem Speicherlayout gilt das auch für die Parameterübergabe.
 
 == Valhalla
 
@@ -43,14 +87,98 @@ image::article/flattened-points.png[]
 
 [.step]
 * Zwei unterschiedliche Typsysteme: Primitive und Objekte
-* Duplizierung vieler API's für Primitive
-* Arrays von Primitiven sind anders
-* Keine Generics mit primitiven Typen => viele _functional Interfaces_, wie `IntPredicate`
+* Arrays von Primitiven sind anders als Arrays von Objekten
+* Keine Generics mit primitiven Typen = viele _functional Interfaces_, 
+  wie `IntPredicate` oder `IntToLongFunction`
 * Problem beim Boxing/Unboxing: Identitiät geht verloren, NPEs, +
   Performancekosten bei Dereferenzierung
-* Libraries (Collections, Streams) nicht per se für Primitive geeigenet
+* `Integer` ist Box von `int`, `Integer[]` aber nicht von `int[]`
+* Libraries (Collections, Streams) nicht per se für Primitive geeigenet,
+  daher gibt es `IntStream` und `PrimitiveIterator.OfInt`.
 
-== Das Gleiche vs. das Selbe
+== Kern Features von Valhalla
+
+* Value Objects
+* Primitive Classes
+* Specialized Generics
+
+Valhalla hat den Anspruch, die Kluft zwischen Primitiven und Objekten
+zu beseitigen.
+
+== `Integer` vs. `int`
+
+--
+[.heading]
+Integer
+
+[.step]
+* Hat eine Speicheradresse (falls nicht wegoptimiert)
+* Variable von Integer ist Zeiger auf Speicheradresse
+* Zwei Variablen sind identisch bzgl. '==', wenn sie auf die gleiche Speicheradresse zeigen
+* Ist ein java.lang.Object
+* Wird vom Garbage-Collector weggeräumt
+* Benötigt Header
+--
+
+--
+[.heading]
+int
+
+[.step]
+* Wird direkt gespeichert
+* Variable von int enthält direkt den Wert
+* Zwei Variablen sind identisch bzgl. '==', wenn sie den gleichen Wert haben
+* Kann per Autoboxing in `Integer` umgewandelt werden
+--
+
+== Identität
+
+Jedes `java.lang.Object` hat eine Identität (Speicheradresse)
+
+* Es besteht ein Unterschied zwischen _das gleiche_ Objekt und _das selbe_ Objekt
+* Objekte sind veränderbar (erschwert Caching)
+* Ermöglicht Polymorphismus (Operationen sind auf Subklassen anwendbar), +
+  da alle Oberklassen des gleiche Speicherlayout haben.
+* Selbst von unveränderbaren Klassen (wie Integer) können (noch) veränderbare
+  Subklassen gebildet werden.
+* Viele Operationen setzen Identität voraus (==, synchronized, System::identityHashCode)
+* Der Ursprung (die Speicheradresse) ist immer relevant
+
+Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abrücken.
+
+== Value-Objekt
+
+* Ein Value-Objekt ist ein Objekt ohne Identität
+* Die zugehörige Klasse ist eine Value-Klasse
+* Value-Klassen sind immer _immutable_.
+* Es können keine Subklassen von Value-Klassen gebildet werden.
+* Die JVM kann solche Objekte beliebig replizieren.
+* Der Ursprung (die vorherige Speicheradresse) ist irrelevant
+* Bis auf die genannten Einschränkungen sind Value-Klassen ganz normale
+  Java-Klassen mit allen zugehörigen Features
+* Ein Value-Objekt kann `null` sein
+* Hinter einer Value-Objekt Variable ist immer noch ein Pointer
+
+== Primitv Klassen
+
+* Primitv Klassen sind spezielle Value-Klassen die einen primitiven Typ repräsentieren
+* Primitive können niemals `null` sein
+* Primitive sind weniger stark gekapselt wie Referenztypen
+* Primitive werden durch eine Sequenz einfacher Instanzvariablen umgesetzt
+* Es gilt der Slogan von Valhalla: _Codes like a class, works like an int_
+* Primitive haben Felder und Methoden und können jederzeit in Value-Objekte 
+  umgewandelt werden (ohne den Overhead für Boxing)
+* Arrays von Primitiven können wie Objekt-Arrays verwendet werden.
+* Bestehende Primitive (int, long, ...) werden durch echte Klassen abgelöst
+
+== Generics
+
+* Jedes Primitv ist ein Value-Objekt oder kann als solches dargestellt werden
+  (d. h. Pointer auf Primitive sind möglich)
+* Jedes Value-Objekt ist ein Objekt und damit sind Generics wie `List<?>` auch 
+  Primitive, wie `int` anwendbar.
+* Spezielle Generics mit optimierten Implementierungen für diverse Primitive sind 
+  machbar.
 
 == Quellen
 
