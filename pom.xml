@@ -10,7 +10,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>20</maven.compiler.source>
+        <maven.compiler.source>23</maven.compiler.source>
         <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
     </properties>
 
@@ -60,7 +60,6 @@
                 <configuration>
                     <compilerArgs>
                         <arg>--enable-preview</arg>
-                        <arg>-XDenablePrimitiveClasses</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>
@@ -69,7 +68,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <argLine>--enable-preview -XX:+EnablePrimitiveClasses</argLine>
+                    <argLine>--enable-preview</argLine>
                 </configuration>
             </plugin>
         </plugins>

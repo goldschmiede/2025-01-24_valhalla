@@ -14,6 +14,7 @@
 |Valhalla|Value Objects
 |Panama|Verknüpfung mit nativem Code
 |Amber|Diverse kleinere Features (Pattern Matching, Textblocks)
+|Babylon|Unterstützung anderer Programmiermodelle durch Code Reflection
 |Coin|Kleinere Features für Java 7
 |Graal|Ahead-of-time Compiler
 |Jigsaw|Module in Java 9, modularisiertes JDK
@@ -128,6 +129,7 @@ int
 * Wird direkt gespeichert
 * Variable von int enthält direkt den Wert
 * Zwei Variablen sind identisch bzgl. '==', wenn sie den gleichen Wert haben
+* Kann niemals `null` sein
 * Kann per Autoboxing in `Integer` umgewandelt werden
 --
 
@@ -180,6 +182,136 @@ Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abr�
 * Spezielle Generics mit optimierten Implementierungen für diverse Primitive sind 
   machbar.
 
+== Value Based Klassen
+
+* Sind mit `@jdk.internal.ValueBased` annotiert (seit JDK 16)
+* Beispiele sind `Optional`, `LocalDate`
+
+.Eigenschaften:
+* Sind final und immutable (können aber Refenzen auf veränderbare Objekte enthalten)
+* `equals()`, `hashCode()` und `toString()` sind unabhängig von Identität
+* Verwenden keine Operationen, die Identität voraussetzen (==, synchronized, ...)
+* Können nur über Factory-Methoden erstellt werden, nicht über Konstruktoren
+* Sind austauschbar mit anderen Objekten, die bzgl. `equals` gleich sind
+* Können nicht zuverlässig mit `==` verglichen werden
+
+Siehe auch https://docs.oracle.com/javase/8/docs/api/java/lang/doc-files/ValueBased.html[ValueBased]
+
+== Identitätssensible Operationen bei Value-Objekten
+
+Gleichheit (`==`):: Bitweise vergleich der Felder (Primitive, Referenzen auf Identity-Objekte), 
+  rekursiv bei referenzierten Value-Objekten
+System::identityHashCode:: Analog zu `==`
+Object Methoden:: `equals`, `hashCode` und `toString` müssen konsistent mit `==` sein
+Synchronization:: Compile-Fehler bzw. `IllegalMonitorStateException`
+Weak references:: Referenzen auf _reine_ Value-Objekte werden nie gelöscht
+Serialization:: Im Objektgraphen wird Gleichheit nach wie vor mit `==` bestimmt
+
+
+== Neue Marker-Interfaces
+
+* `ValueObject`
+* `IdentityObject`
+
+.Für diese Interfaces gelten Einschränkungen
+* Man kann nur prüfen, ob ein Objekt eines dieser Interfaces implementiert.
+* Man kann es nicht explizit implementieren.
+* Jedes Objekt implementiert genau eines dieser Interfaces.
+* `new Object()` erzeugt eine Subklasse von Object, die ein `IdentityObject` ist.
+
+== Definition von Primitiven
+
+[source, Java]
+----
+primitive class Point implements Serializable {
+    int x;
+    int y;
+
+    Point(int x, int y) { 
+        this.x = x;
+        this.y = y;
+    }
+
+    Point scale(int s) { 
+        return new Point(s*x, s*y);
+    }
+}
+----
+
+* ValueObject
+* Nicht nullable
+* Keine _initialization safety guarantees_
+* Bestehen nur aus Primitiven
+* Keine rekursiven Typen möglich
+* Flaches Speicher-Layout
+
+== Polymorphismus bei Primitiven
+
+* Primtive können abstrakte Klassen erweitern und Interfaces implementieren
+* Zu jeder primitven Klasse gibt es 2 Typen:
+   . Einen primitiven Typ, z. B. `Point`
+   . Einen Referenztyp, z. B. `Point.ref`
+* Zwischen den beiden Typen kann beliebig und nach Bedarf konvertiert werden
+  (ähnlich dem Autoboxing)
+* Polymorphismus ist nur für den Referenztyp gegeben
+
+== Legacy Primitives
+
+* `int` wird eine Primitive Klasse
+* `Integer` ist Alias für `int.ref`
+
+== Objekte und Primtive (Stand heute)
+
+|===
+|Primitives|Objects
+
+|No identity (pure values)|Identity
+|== compares values 	|== compares object identity
+|Built-in 	|Declared in classes
+|Not nullable 	|Nullable
+|No members (fields, methods, constructors) 	|Members (including mutable fields)
+|No supertypes or subtypes 	|Class and interface inheritance
+|Accessed directly 	|Accessed via object references
+|Default value is zero 	|Default value is null
+|Arrays of primitives are monomorphic 	|Arrays are covariant
+|Tearable under race 	|Initialization safety guarantees
+|Convertible to polymorphic objects 	|Polymorphic
+|===
+
+
+== Objekte und Primtive (nach Einführung von Valhalla)
+
+|===
+|Primitives|Objects
+
+|Not nullable; default value is zero|Nullable; default value is null
+|Tearable under race|Initialization safety guarantees
+|Convertible to polymorphic objects|Polymorphic
+|===
+
+== Vorteile von Valhalla
+
+|===
+|Current World 	|Valhalla
+
+|All objects have identity 	|Some objects have identity
+|Fixed, built-in set of primitives 	|Open-ended set of primitives, declared with classes
+|Primitives don’t have methods or supertypes 	|Primitives have classes, with methods and supertypes
+|Primitives have ad-hoc boxes 	|Primitives have regularized companion reference types
+|Boxes have accidental identity 	|Value objects have no identity
+|Boxing and unboxing conversions 	|Value object and primitive value conversions, but same rules
+|Primitive arrays are monomorphic |All arrays are covariant
+|===
+
+== Ausblick
+
+.Einführung erfolgt in 3 Phasen:
+. Value Objects
+. Primitiv Klassen, migration bestehender Primtive und universelle Generics
+. Spezialisierte Generics
+
+Die Einführung erfolgt in kleinen Schritten über viele JDK-Versionen hinweg.
+
 == Quellen
 
 * Story (3 Teile): https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background
@@ -188,3 +320,4 @@ Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abr�
 * JEP Overview: https://openjdk.org/jeps/0
 * Value Classes and Objects: https://openjdk.org/jeps/401
 * Enhanced Primitive Boxing: https://openjdk.org/jeps/402
+* Records vs. Value Types: https://www.beyondjava.net/records-vs-value-types
