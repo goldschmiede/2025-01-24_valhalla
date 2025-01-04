@@ -13,7 +13,7 @@ public value class ArrayCursor<T> {
         return offset < array.length;
     }
 
-    public T next() { 
+    public T get() { 
         return array[offset];
     }
 

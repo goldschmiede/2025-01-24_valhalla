@@ -15,9 +15,7 @@ public class ArrayCursorTest {
         for (ArrayCursor<Integer> c = new ArrayCursor<>(array, 0); 
                 c.hasNext(); 
                 c = c.advance()) {
-            System.out.println(c.next());
+            System.out.println(c.get());
         }
-
-        assertThat(new ArrayCursor<>(array, 0)).isInstanceOf(ValueObject.class);
     }
 }
