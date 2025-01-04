@@ -152,7 +152,7 @@ Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abr�
 
 * Ein Value-Objekt ist ein Objekt ohne Identität
 * Die zugehörige Klasse ist eine Value-Klasse
-* Value-Klassen sind immer _immutable_.
+* Value-Klassen sind immer _immutable_, d. h. alle Felder sind final und nicht volatil.
 * Es können keine Subklassen von Value-Klassen gebildet werden.
 * Die JVM kann solche Objekte beliebig replizieren.
 * Der Ursprung (die vorherige Speicheradresse) ist irrelevant
@@ -197,6 +197,74 @@ Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abr�
 
 Siehe auch https://docs.oracle.com/javase/8/docs/api/java/lang/doc-files/ValueBased.html[ValueBased]
 
+== Kandiaten für Value-Klassen
+
+.Optional
+----
+@jdk.internal.ValueBased
+public final class Optional<T> {
+----
+
+.LocalDate
+----
+@jdk.internal.ValueBased
+public final class LocalDate
+        implements Temporal, TemporalAdjuster, ChronoLocalDate, Serializable {
+----
+
+.Integer
+----
+@jdk.internal.ValueBased
+public final class Integer extends Number
+        implements Comparable<Integer>, Constable, ConstantDesc {
+----
+
+.Byte
+----
+@jdk.internal.ValueBased
+public final class Byte extends Number implements Comparable<Byte>, Constable {
+----
+
+.String
+----
+public final class String
+    implements java.io.Serializable, Comparable<String>, CharSequence,
+               Constable, ConstantDesc {
+----
+
+== Annotation und Marker Interfaces
+
+.ValueBased (seit JDK 16)
+----
+@Retention(RetentionPolicy.RUNTIME)
+@Target(value={TYPE})
+public @interface ValueBased {
+}
+----
+
+.Constable (seit JDK 12) -- Exemplar kann im _Constant Pool_ abgelegt werden
+----
+public interface Constable {
+    Optional<? extends ConstantDesc> describeConstable();
+}
+----
+
+.ConstantDesc (seit JDK 12)
+----
+public sealed interface ConstantDesc
+        permits ClassDesc,
+                MethodHandleDesc,
+                MethodTypeDesc,
+                Double,
+                DynamicConstantDesc,
+                Float,
+                Integer,
+                Long,
+                String {
+    Object resolveConstantDesc(MethodHandles.Lookup lookup) throws ReflectiveOperationException;
+}
+----
+
 == Identitätssensible Operationen bei Value-Objekten
 
 Gleichheit (`==`):: Bitweise vergleich der Felder (Primitive, Referenzen auf Identity-Objekte), 
@@ -213,11 +281,29 @@ Serialization:: Im Objektgraphen wird Gleichheit nach wie vor mit `==` bestimmt
 * `ValueObject`
 * `IdentityObject`
 
+---
+
 .Für diese Interfaces gelten Einschränkungen
-* Man kann nur prüfen, ob ein Objekt eines dieser Interfaces implementiert.
-* Man kann es nicht explizit implementieren.
-* Jedes Objekt implementiert genau eines dieser Interfaces.
+* Man kann prüfen, ob ein Objekt eines dieser Interfaces implementiert.
+* Ein Klasse kann niemals beide Interfaces implementieren.
+* Jedes Objekt implementiert genau eines dieser Interfaces. +
+  Nötigenfalls wird das jeweilige Interface von der JVM ergänzt.
 * `new Object()` erzeugt eine Subklasse von Object, die ein `IdentityObject` ist.
+* Abstrakte Klassen implementieren per se keines der beiden Interfaces, +
+  können dies aber explizit tun.
+
+== Vererbung bei Value-Objekten
+
+* Bei einem `IdentityObject` erzeugt der Compiler für jeden Konstruktur
+  eine `<init>` Methode.
+* Jede `<init>` Methode ruft eine `<init>` Methode der Oberklasse auf.
+* Bei einem `ValueObject` erzeugt der Compiler für jeden Konstruktur +
+  eine statische Factory Methode `<new>`.
+* Die `<new>` Methode ruft *keine* `<init>` Methode einer abstraken Oberklasse auf.
+* Sobald eine abstrakte Klasse einen nicht leeren Default-Konsturktur hat, +
+  implementiert sie `IdentityObject`.
+* (Abstrakte) Value-Klassen haben keine `<init>` Methode und +
+  implementieren `ValueObject`.
 
 == Definition von Primitiven
 
@@ -259,6 +345,12 @@ primitive class Point implements Serializable {
 
 * `int` wird eine Primitive Klasse
 * `Integer` ist Alias für `int.ref`
+
+== Primitive in der VM
+
+* Jede derartige .class-Datei ist mit `ACC_PRIMTIVE` markiert
+* Primtive Felder oder Paramter können den Q-Deskriptor (inline) + 
+  statt dem L-Descriptor (Pointer) verwenden.
 
 == Objekte und Primtive (Stand heute)
 
@@ -302,6 +394,14 @@ primitive class Point implements Serializable {
 |Boxing and unboxing conversions 	|Value object and primitive value conversions, but same rules
 |Primitive arrays are monomorphic |All arrays are covariant
 |===
+
+== Meine Bedenken bzgl. Valhalla
+
+* Es entfällt die Möglichkeit zwei Pointer zu vergleichen
+* Die Ausführungsdauer für `==` ist nicht mehr einfach vorhersagebar
+* `new Object()` ist unschön, `Object` sollte abstrakt werden
+* Auto-Unboxing führt zu verdeckten NullPointerExceptions, besser wäre
+  ein striktes Typsystem wie bei Kotlin
 
 == Ausblick
 
