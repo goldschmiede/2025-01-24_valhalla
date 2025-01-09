@@ -8,7 +8,7 @@
 [.text-center]
 --
 // FIXME Untertitel ändern
-**C-Performance mit Java**
+**Value-Objekte mit Java**
 
 // FIXME Titelbild hinzufügen
 image::anderScore/anderscore-white.jpg[height=200]
@@ -18,5 +18,3 @@ Goldschmiede
 
 {date}, {author}
 --
-
-include::agenda.adoc[]

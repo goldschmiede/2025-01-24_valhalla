@@ -8,12 +8,10 @@
 :imagesdir: images
 :date: {revealjs_date}
 
-== Agenda
-
 include::teaser.adoc[]
 
 include::00-greeting.adoc[]
 
-include::01-intro.adoc[]
+include::valhalla.adoc[]
 
 

@@ -6,6 +6,6 @@
 :space:
 
 // Nicht gewünschtes auskommentieren
-include::{basedir}/generated-src/speaker.adoc[]
+include::speaker.adoc[]
 
-include::{basedir}/generated-src/anderScore1Slide.adoc[]
+include::anderScore1Slide.adoc[]

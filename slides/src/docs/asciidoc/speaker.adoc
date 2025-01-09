@@ -1,0 +1,23 @@
+:imagesdir: images
+
+[.columns]
+== Vorstellung
+
+[.two-col]
+--
+[.heading]
+Hans Jörg Heßmann (Dipl. Informatiker)
+
+* Softwareentwickler
+* Java seit 1997
+* Schwerpunkte
+** Webanwendungen
+** Batch-Entwicklung
+** Build und Deployment
+** Codequalität und Testing
+* Java, Spring, Vaadin, Asciidoc, DessertJ
+
+--
+
+image::anderScore/hjhessmann.jpg[pdfwidth=7cm]
+

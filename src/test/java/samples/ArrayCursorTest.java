@@ -2,6 +2,7 @@ package samples;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
@@ -17,5 +18,15 @@ public class ArrayCursorTest {
                 c = c.advance()) {
             System.out.println(c.get());
         }
+    }
+
+    @Test
+    void check() {
+        Integer[] array = new Integer[0];
+        var c = new ArrayCursor<>(array, 0); 
+
+        assertThat(Objects.hasIdentity(c)).isFalse();
+        assertThat(Objects.hasIdentity(Integer.valueOf(0))).isFalse();
+        assertThat(Objects.hasIdentity("")).isTrue();
     }
 }
