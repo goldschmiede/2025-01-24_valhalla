@@ -1,0 +1,28 @@
+== Plan
+
+. JEP 401: Value Classes
+. JEP (JDK-8303099): Null restricted types (! and ? markers wie bei Kotlin)
+. JEP (JDK-8316779): Null-restricted value classes types
+. JEP 482: Pre-initialization context -> Strictly initialized fields
+. JEP 402: Enhanced Primitive Boxing
+
+== Quellen
+
+* Story (3 Teile): https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background
+* Projekt: https://openjdk.org/projects/valhalla/
+* JDK: https://jdk.java.net/valhalla/
+* JEP Overview: https://openjdk.org/jeps/0
+* Value Classes and Objects: https://openjdk.org/jeps/401
+* Enhanced Primitive Boxing: https://openjdk.org/jeps/402
+* Records vs. Value Types: https://www.beyondjava.net/records-vs-value-types
+* https://cr.openjdk.org/~jrose/values/values-0.html
+* Specialized Generics: https://cr.openjdk.org/~jrose/values/parametric-vm.pdf
+
+== Links
+
+* Projekt: https://openjdk.org/projects/valhalla/
+* JDK: https://jdk.java.net/valhalla/
+* JEP Overview: https://openjdk.org/jeps/0
+* Value Classes and Objects: https://openjdk.org/jeps/401
+* Enhanced Primitive Boxing: https://openjdk.org/jeps/402
+* Story (3 Teile): https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background
