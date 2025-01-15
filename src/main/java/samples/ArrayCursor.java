@@ -1,5 +1,6 @@
 package samples;
 
+// tag::code[]
 public value class ArrayCursor<T> {
     private final T[] array;
     private final int offset;
@@ -21,3 +22,4 @@ public value class ArrayCursor<T> {
         return new ArrayCursor(array, offset+1);
     }
 }
+// end::code[]

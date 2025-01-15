@@ -1,5 +1,6 @@
 package samples;
 
+// tag::code[]
 value record Color(byte red, byte green, byte blue) {
     public Color(int r, int g, int b) {
         this(checkByte(r), checkByte(g), checkByte(b));
@@ -20,3 +21,4 @@ value record Color(byte red, byte green, byte blue) {
         return (byte) (((b1 & 0xff) + (b2 & 0xff)) / 2);
     }
 }
+// end::code[]

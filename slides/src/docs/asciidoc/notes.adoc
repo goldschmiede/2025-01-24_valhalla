@@ -1,7 +1,7 @@
 == Plan
 
 . JEP 401: Value Classes
-. JEP (JDK-8303099): Null restricted types (! and ? markers wie bei Kotlin)
+. JEP (JDK-8303099): Null restricted types (! and ? markers wie bei Kotlin): https://bugs.openjdk.org/browse/JDK-8303099
 . JEP (JDK-8316779): Null-restricted value classes types
 . JEP 482: Pre-initialization context -> Strictly initialized fields
 . JEP 402: Enhanced Primitive Boxing

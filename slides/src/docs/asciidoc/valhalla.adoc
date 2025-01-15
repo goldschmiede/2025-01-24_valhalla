@@ -171,19 +171,61 @@ Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abr�
 * Die VM bzw. der Compiler entscheidet, ob ein Value-Objekt referenziert 
   oder inline abgelegt wird.
 
+[.columns]
 == Beispiel Value-Klasse
 
+[.top]
+--
+.Value Klasse
+[source, java]
+----
+include::{codedir}src/main/java/samples/ArrayCursor.java[tags=code]
+----
+--
+[.top]
+--
+.Verwendung
+[source, java, indent=0]
+----
+include::{codedir}src/test/java/samples/ArrayCursorTest.java[tags=code]
+----
+--
+
+[.columns]
 == Value Klassen vs. Records
+
+--
+.Records ...
+* haben Identität
+* verzichten auf Kapselung
+
+.Value Objekte ...
+* verzichten auf Identität
+--
+
+.Value Record:
+--
+[source, java, indent=0]
+----
+include::{codedir}src/main/java/samples/Color.java[tags=code]
+----
+
+.Verwendung:
+[source, java, indent=0]
+----
+include::{codedir}src/test/java/samples/ColorTest.java[tags=code]
+----
+--
 
 == Identitätssensible Operationen bei Value-Objekten
 
 Gleichheit (`==`):: Bitweise vergleich der Felder (Primitive, Referenzen auf Identity-Objekte), 
   rekursiv bei referenzierten Value-Objekten
-System::identityHashCode:: Analog zu `==` (noch in Klärung)
-Object Methoden:: `equals`, `hashCode` und `toString` müssen konsistent mit `==` sein
+System::identityHashCode:: Kombination aus Hashcodes der Felder
 Synchronization:: Compile-Fehler bzw. `IllegalMonitorStateException`
-Weak references:: Nicht zulässig (Exception)
+Weak references:: Nicht zulässig (IdentityException)
 Serialization:: Im Objektgraphen wird Gleichheit nach wie vor mit `==` bestimmt
+Garbage collection:: Kein `finalize`, kann wiederverwendet werden (existiert schon vor `new`)
 
 == Value-Based Klassen
 
@@ -209,9 +251,37 @@ Siehe auch https://docs.oracle.com/javase/8/docs/api/java/lang/doc-files/ValueBa
 
 == Nullability
 
+* Value-Objekte können `null` sein
+* Inlining: Zusätzliche Bits notwendig
+* Verzicht auf 'Nullability' mit `Foo!`
+  ermöglicht weitere Optimierungen
+* https://openjdk.org/jeps/8303099[JDK-8303099]: Null-Restricted and Nullable Types +
+  (! and ? Marker wie bei Kotlin)
+* https://openjdk.org/jeps/8316779[JDK-8316779]: Null-Restricted Value Class Types
+
 == Zeroing
 
-== Value-Objekte in Arrays
+[.step]
+* Womit soll Array initialisiert werden?
++
+[source, java]
+----
+Point![] points = new Point![100];
+----
+* Zero-Repräsentation notwendig +
+  `implict` Konstruktor
+* Initializer:
++
+[source, java]
+----
+Point![] points = new Point![] {new Point(1, 2), new Point(3, 4)};
+----
+* Initializer mit Lambda (Zukunft):
++
+[source, java]
+----
+Point![] points = new Point![100] {i -> new Point(i, 0)};
+----
 
 == Tearing
 
@@ -237,13 +307,17 @@ beim Aufruf von `this.sum()`
 ----
 include::{codedir}src/main/java/samples/ValueTest.java[tags=code]
 ----
+
+NOTE: Keine Selbstreferenz möglich!
 --
 
 == Strictly initialized fields
 
-* Ein Feld ist _strictly initialized_, wenn es vor dem Aufruf von `super()` initialisiert wurde
-* Alle Felder von Value-Klassen müssen das erfüllen
-* Alle _null-restricted_ Felder (Felder die niemals null sein dürfen) müssen das erfüllen
+Ein Feld ist _strictly initialized_, wenn es vor dem Aufruf von `super()` initialisiert wurde.
+
+.Das ist notwendig für
+* Alle Felder von Value-Klassen
+* Alle _null-restricted_ Felder (Felder die niemals null sein dürfen)
 
 Siehe auch https://openjdk.org/jeps/482[JEP 482]: Flexible Constructor Bodies (Second Preview, JDK 23)
 
@@ -286,6 +360,7 @@ boolean hasIdentity(Object obj);
 * Value Classes and Objects: https://openjdk.org/jeps/401
 * Enhanced Primitive Boxing: https://openjdk.org/jeps/402
 * Story (3 Teile): https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background
+* Brian Goetz (Juli 24): https://www.youtube.com/watch?v=IF9l8fYfSnI
 
 [state=no-title-footer]
 == Fragen?
