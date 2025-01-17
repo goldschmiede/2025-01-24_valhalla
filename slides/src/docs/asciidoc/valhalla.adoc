@@ -87,15 +87,16 @@ image::article/flattened-points.png[]
 * Arbeit seit 2014 +
   (tatsächlich sollten value types schon Bestandteil der 1. Sparchversion sein)
 * Bekannt durch Artikel https://openjdk.org/projects/valhalla/design-notes/state-of-valhalla/01-background[State of Valhalla], von Brian Goetz, Dez. 2021
-* Viel Bewegung in den letzten Monaten
 * Link: https://openjdk.org/projects/valhalla/
+* Viel Bewegung in den letzten Monaten
+* Video zum aktuellen Stand: https://www.youtube.com/watch?v=IF9l8fYfSnI[Vortrag von Brian Goetz (Juli 24)]
 
 *Ziele:*
 
 * Flacheres und dichteres Speicherlayout
 * Keine Kompromisse bei Abstraktion und Typsicherheit
 * Nicht nur _Flattening_ im Speicher, sondern auch bei der Parameterübergabe: +
-  2 ints statt ein Pointer auf Point
+  2 _ints_ statt ein _Pointer_ auf `Point`
 
 == Ist-Situation bei Java
 
@@ -109,10 +110,6 @@ image::article/flattened-points.png[]
 * `Integer` ist Box von `int`, `Integer[]` aber nicht von `int[]`
 * Libraries (Collections, Streams) nicht per se für Primitive geeigenet,
   daher gibt es `IntStream` und `PrimitiveIterator.OfInt`.
-
-== Optimierung zur Laufzeit: Scalaring
-
-== Optimierung zur Laufzeit: Inlining
 
 == Flattening
 
@@ -156,6 +153,16 @@ Jedes `java.lang.Object` hat eine Identität (Speicheradresse)
 * Der Ursprung (die Speicheradresse) ist immer relevant
 
 Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abrücken.
+
+== Integer mit und ohne Identität
+[%autowidth]
+|===
+|Ausdruck|Gegenwart|Valhalla
+|`new Integer(x) == new Integer(x)`|false|true
+|`Integer.valueOf(x) == Integer.valueOf(x)`|?|true
+|`new Integer(x) == x`|true|true
+|`Integer.valueOf(x) == x`|true|true
+|===
 
 == Value-Objekt
 
@@ -201,6 +208,7 @@ include::{codedir}src/test/java/samples/ArrayCursorTest.java[tags=code]
 
 .Value Objekte ...
 * verzichten auf Identität
+* Nach JEP 401 sollen alle Records Value-Objekte sein
 --
 
 .Value Record:
@@ -285,8 +293,20 @@ Point![] points = new Point![100] {i -> new Point(i, 0)};
 
 == Tearing
 
+* Instanzvariable 'long a' auf einer 32-Bit Architektur:
++
+----
+a = a << 32;
+----
+Ein anderer Thread könnte einen Zwischenstand auslesen, bei
+welchem nur die obere oder die untere Hälfte verändert wurde.
+* Pointer können nicht _zerrissen_ werden, daher besteht
+  das Problem bei Referenztypen nicht.
+* Das Problem tritt nicht auf, solange ein Value-Objekt
+  nach dem Inlinining in 64 Bit passt.
+
 [.columns]
-== Problem bei `final` Feldern
+== Initialisierung
 
 [.top]
 --
@@ -296,8 +316,9 @@ Point![] points = new Point![100] {i -> new Point(i, 0)};
 include::{codedir}src/main/java/samples/IdentityTest.java[tags=code]
 ----
 
-_this_ ist impliziter Parameter +
-beim Aufruf von `this.sum()`
+Veränderung möglich, da die +
+Identität (Speicheradresse)
+gleich bleibt
 --
 
 [.top]
@@ -307,6 +328,8 @@ beim Aufruf von `this.sum()`
 ----
 include::{codedir}src/main/java/samples/ValueTest.java[tags=code]
 ----
+
+Keine Veränderung beobachtbar
 
 NOTE: Keine Selbstreferenz möglich!
 --
@@ -320,11 +343,17 @@ Ein Feld ist _strictly initialized_, wenn es vor dem Aufruf von `super()` initia
 * Alle _null-restricted_ Felder (Felder die niemals null sein dürfen)
 
 Siehe auch https://openjdk.org/jeps/482[JEP 482]: Flexible Constructor Bodies (Second Preview, JDK 23)
+Bei der Deserialisierung müssen solche Felder gesondert behandelt werden
 
-== Serialisierung
+== Vererbung bei Value-Klassen
 
-== Vererbung bei Value-Objekten
-
+* Konkrete Value-Klassen sind implizit final (d. h. sie können keine Subklassen haben)
+* Abstrakte Value-Klassen können sowohl von Identity-Klassen als auch von
+  Value-Klassen erweitert werden
+* Value-Klassen können nicht von Idenity-Klassen erben
+* Value-Klassen können Interfaces implementieren
+* Objekt ist eine Identity-Klasse wird aber bzgl. Value-Klassen wie
+  ein Interface betrachtet
 
 == Neue Objects-Methoden
 
@@ -339,9 +368,64 @@ boolean hasIdentity(Object obj);
 
 == Integer -> Integer! -> int
 
+* `Integer` wird mit Valhalla zu einer Value-Klasse
+* `Integer!` ist ein Value-Objekte, das niemals null sein kann
+* Die JVM (bzw. der Compiler) können `Integer!` genauso effizient.
+  wie `int` implementieren.
+* Der Compiler kann ein `int` wie ein `Integer!` behandeln.
+* Wechseleitige zusweisung von `Integer![]` und `int[]` möglich.
+* Generics wie `List<int>` möglich.
+* `Stream<Integer!>` kann `IntStream` ersetzen.
+
 == Erweitertes Autoboxing
 
 == Specialized Generics
+
+[.columns]
+== Mögliche Optimierung: Scalarization
+
+--
+[source, java]
+----
+// original method:
+public Color mix(Color that) {
+    return new Color(avg(red, that.red),
+                     avg(green, that.green),
+                     avg(blue, that.blue));
+}
+
+// effectively:
+static { boolean, byte, byte, byte }
+    mix(boolean this_null, byte this_r,
+        byte this_g, byte this_b,
+        boolean that_null, byte that_r,
+        byte that_g, byte that_b) {
+           
+     $checkNull(this_null);
+     $checkNull(that_null);
+     return { false,
+              avg(this_r, that_r),
+              avg(this_g, that_g),
+              avg(this_b, that_b) };
+}
+----
+--
+
+--
+* Objekt wird durch dessen Essenz ersetzt
+* Auch manuell möglich, indem man direkt mit +
+3 Bytes für `red`, `green` und `blue` arbeitet.
+* Die JVM bzw. der Compiler führen diese Optimierung +
+auch jetzt schon durch, falls sie beweisen können, +
+dass ein Objekt nicht referenziert wird.
+* Nur möglich Variable vom Typ eine konkreten Klasse
+--
+
+== Mögliche Optimierung: Heap Flattening
+
+* Statt Referenzen (Pointer) werden die Inhalte der Objekte
+  direkt als Bitvector an Ort und Stelle gespeichert
+* Besonders effizient in Kombination mit Arrays
 
 == Vector-API
 
@@ -350,7 +434,6 @@ boolean hasIdentity(Object obj);
 . https://openjdk.org/jeps/390[JEP 390]: Warnings for Value-Based Classes (JDK 16)
 . https://openjdk.org/jeps/482[JEP 482]: Flexible Constructor Bodies (Second Preview, JDK 23)
 . https://openjdk.org/jeps/401[JEP 401]: Value Classes and Objects (Preview)
-
 
 == Quellen
 
