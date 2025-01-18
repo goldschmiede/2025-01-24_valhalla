@@ -29,5 +29,10 @@ public class IntegerIdentityTest {
     @Test
     void check4() {
         assertThat(Integer.valueOf(x) == x).isTrue();
+        Integer.valueOf(5).toString();
+    }
+
+    void arrays() {
+        int[] a = {1, 2, 3};
     }
 }

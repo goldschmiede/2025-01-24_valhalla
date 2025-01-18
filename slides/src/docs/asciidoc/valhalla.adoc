@@ -379,7 +379,33 @@ boolean hasIdentity(Object obj);
 
 == Erweitertes Autoboxing
 
-== Specialized Generics
+.Ziele:
+. Autoboxing bei _field access_, _method invocation_ oder _method reference_:
++
+[source, java]
+----
+int i = 12;
+int iSize = i.SIZE;
+double iAsDouble = i.doubleValue();
+Supplier<String> iSupp = i::toString;
+----
++
+. Methode `int calc()` darf `Integer calc()` überschreiben und umgekehrt
+  (geht auch mit `Object`)
+. Primitive als Parameter bei Generics, also z. B. `List<int>`
+. Konvertierung von Arrays, wie
++
+[source, java]
+----
+int[] a = {1, 2, 3};
+Integer[] b = a;
+int[] c = b;
+----
+
+Siehe auch https://openjdk.org/jeps/402[JEP 402: Enhanced Primitive Boxing (Preview)]
+
+Später soll es mit _Specialized Generics_ auch mal möglich sein, spezielle Generics für Primitve 
+zu bauen. Siehe hierzu: https://cr.openjdk.org/~jrose/values/parametric-vm.pdf
 
 [.columns]
 == Mögliche Optimierung: Scalarization
@@ -428,6 +454,16 @@ dass ein Objekt nicht referenziert wird.
 * Besonders effizient in Kombination mit Arrays
 
 == Vector-API
+
+* Optimierung für Single Instruction Multiple Data (SIMD) Operationen
+* Klassen und Subklassen vom Typ `Vector<E>` werden
+  Value-Klassen sein.
+* Vector hat Typ (E): Byte, Short, Integer, Long, Float oder Double
+* und Ausprägung (Shape): 64, 128, 256, 512 oder _max_ Bits.
+* Die Vector-API benötigt Value-Objekte, daher bleibt sie 
+  im _incubate_ Status, bis Valhalla so weit ist.
+ 
+Siehe auch https://openjdk.org/jeps/469[JEP 469: Vector API (Eighth Incubator)] (JDK 23)
 
 == Wo stehen wir, wo geht es hin?
 
