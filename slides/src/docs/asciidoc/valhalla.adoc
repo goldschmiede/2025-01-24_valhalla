@@ -10,6 +10,7 @@
 . Einordnung und Hintergrund
 . Problemstellung
 . Lösungsansätze
+. Nutzen
 . Blick in die Glaskugel
 
 == Java-Projekte
@@ -168,15 +169,15 @@ Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abr�
 
 * Ein Value-Objekt ist ein Objekt ohne Identität
 * Die zugehörige Klasse ist eine Value-Klasse
-* Value-Klassen sind immer _immutable_, d. h. alle Felder sind _final_ und nicht _volatil_.
-* Es können keine Subklassen von (konkreten) Value-Klassen gebildet werden.
-* Die JVM kann solche Objekte beliebig replizieren.
+* Value-Klassen sind immer _immutable_, d. h. alle Felder sind _final_ und nicht _volatil_
+* Es können keine Subklassen von (konkreten) Value-Klassen gebildet werden
+* Die JVM kann solche Objekte beliebig replizieren oder recyceln
 * Der Ursprung (die vorherige Speicheradresse) ist irrelevant
 * Bis auf die genannten Einschränkungen sind Value-Klassen ganz normale
   Java-Klassen mit allen zugehörigen Features
 * Ein Value-Objekt kann `null` sein
 * Die VM bzw. der Compiler entscheidet, ob ein Value-Objekt referenziert 
-  oder inline abgelegt wird.
+  oder inline abgelegt wird
 
 [.columns]
 == Beispiel Value-Klasse
@@ -208,7 +209,11 @@ include::{codedir}src/test/java/samples/ArrayCursorTest.java[tags=code]
 
 .Value Objekte ...
 * verzichten auf Identität
-* Nach JEP 401 sollen alle Records Value-Objekte sein
+
+&nbsp; +
+
+Nach JEP 401 sollen alle + 
+  Records Value-Objekte sein
 --
 
 .Value Record:
@@ -305,6 +310,10 @@ welchem nur die obere oder die untere Hälfte verändert wurde.
 * Das Problem tritt nicht auf, solange ein Value-Objekt
   nach dem Inlinining in 64 Bit passt.
 
+NOTE: Pointer belegt bei der JVM standardmäßig nur 32 Bit +
+  damit können 32 GB adressiert werden +
+  (_Compressed Ordinary Object Pointers_).
+
 [.columns]
 == Initialisierung
 
@@ -343,14 +352,15 @@ Ein Feld ist _strictly initialized_, wenn es vor dem Aufruf von `super()` initia
 * Alle _null-restricted_ Felder (Felder die niemals null sein dürfen)
 
 Siehe auch https://openjdk.org/jeps/482[JEP 482]: Flexible Constructor Bodies (Second Preview, JDK 23)
+
 Bei der Deserialisierung müssen solche Felder gesondert behandelt werden
 
 == Vererbung bei Value-Klassen
 
 * Konkrete Value-Klassen sind implizit final (d. h. sie können keine Subklassen haben)
-* Abstrakte Value-Klassen können sowohl von Identity-Klassen als auch von
-  Value-Klassen erweitert werden
-* Value-Klassen können nicht von Idenity-Klassen erben
+* Abstrakte Value-Klassen können sowohl von Identity-Klassen +
+  als auch von Value-Klassen erweitert werden
+* Value-Klassen können nicht von Identity-Klassen erben
 * Value-Klassen können Interfaces implementieren
 * Objekt ist eine Identity-Klasse wird aber bzgl. Value-Klassen wie
   ein Interface betrachtet
@@ -449,7 +459,7 @@ dass ein Objekt nicht referenziert wird.
 
 == Mögliche Optimierung: Heap Flattening
 
-* Statt Referenzen (Pointer) werden die Inhalte der Objekte
+* Statt Referenzen (Pointer) werden die Inhalte der Objekte +
   direkt als Bitvector an Ort und Stelle gespeichert
 * Besonders effizient in Kombination mit Arrays
 
