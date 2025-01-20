@@ -99,6 +99,13 @@ image::article/flattened-points.png[]
 * Nicht nur _Flattening_ im Speicher, sondern auch bei der Parameterübergabe: +
   2 _ints_ statt ein _Pointer_ auf `Point`
 
+== Worum geht es bei Valhalla?
+
+* https://openjdk.org/jeps/401[JEP 401]: Value Classes and Objects
+* https://openjdk.org/jeps/8303099[JDK-8303099]: Null-Restricted and Nullable Types
+* https://openjdk.org/jeps/8316779[JDK-8316779]: Null-Restricted Value Class Types
+* https://openjdk.org/jeps/402[JEP 402]: Enhanced Primitive Boxing
+
 == Ist-Situation bei Java
 
 [.step]
@@ -120,12 +127,12 @@ image::article/flattened-points.png[]
   semantischen Hebeln, die einerseits Sinn für den Anwender machen,
   und anderseits für Performanceoptimierung genutzt werden können.
 * Die Lösung ist, dem Anwender die Möglichkeit zu geben, besimmte 
-  Freiheitsgrade explizit abzuwählen (final, not nullable).
+  Freihefitsgrade explizit abzuwählen (final, not nullable).
 
-== Primtive vs. Objekte
+== Primitive vs. Objekte
 
 |===
-|Primitive (z. B. `int)|Objekte (z. B. `Integer`)
+|Primitive (z. B. `int`)|Objekte (z. B. `Integer`)
 
 |Keine Identität|Identität
 |`==` vergleicht den Wert|`==` vergleicht Identität (Speicheradresse)
@@ -152,6 +159,7 @@ Jedes `java.lang.Object` hat eine Identität (Speicheradresse)
   Subklassen gebildet werden.
 * Viele Operationen setzen Identität voraus (==, synchronized, System::identityHashCode)
 * Der Ursprung (die Speicheradresse) ist immer relevant
+* Objekte haben einen Lebenszyklus
 
 Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abrücken.
 
@@ -171,7 +179,8 @@ Das Hauptmerkmal von Valhalla ist, dass einige Objekte von ihrer Identität abr�
 * Die zugehörige Klasse ist eine Value-Klasse
 * Value-Klassen sind immer _immutable_, d. h. alle Felder sind _final_ und nicht _volatil_
 * Es können keine Subklassen von (konkreten) Value-Klassen gebildet werden
-* Die JVM kann solche Objekte beliebig replizieren oder recyceln
+* Die JVM kann solche Objekte beliebig replizieren oder wiederverwenden
+* Value-Objekte haben keinen Lebenszyklus
 * Der Ursprung (die vorherige Speicheradresse) ist irrelevant
 * Bis auf die genannten Einschränkungen sind Value-Klassen ganz normale
   Java-Klassen mit allen zugehörigen Features
@@ -319,7 +328,7 @@ NOTE: Pointer belegt bei der JVM standardmäßig nur 32 Bit +
 
 [.top]
 --
-.Zugriff auf nicht intialisierte Felder zulässig
+.Zugriff auf nicht initialisierte Felder zulässig
 [source java]
 ----
 include::{codedir}src/main/java/samples/IdentityTest.java[tags=code]
@@ -332,7 +341,7 @@ gleich bleibt
 
 [.top]
 --
-.Felder müssen vor `super()` initialisiert sein
+.Felder müssen vor `super()` initialisiert worden sein
 [source java]
 ----
 include::{codedir}src/main/java/samples/ValueTest.java[tags=code]
@@ -380,10 +389,10 @@ boolean hasIdentity(Object obj);
 
 * `Integer` wird mit Valhalla zu einer Value-Klasse
 * `Integer!` ist ein Value-Objekte, das niemals null sein kann
-* Die JVM (bzw. der Compiler) können `Integer!` genauso effizient.
+* Die JVM (bzw. der Compiler) können `Integer!` genauso effizient
   wie `int` implementieren.
 * Der Compiler kann ein `int` wie ein `Integer!` behandeln.
-* Wechseleitige zusweisung von `Integer![]` und `int[]` möglich.
+* Wechselseitige zusweisung von `Integer![]` und `int[]` möglich.
 * Generics wie `List<int>` möglich.
 * `Stream<Integer!>` kann `IntStream` ersetzen.
 
@@ -454,7 +463,7 @@ static { boolean, byte, byte, byte }
 * Die JVM bzw. der Compiler führen diese Optimierung +
 auch jetzt schon durch, falls sie beweisen können, +
 dass ein Objekt nicht referenziert wird.
-* Nur möglich Variable vom Typ eine konkreten Klasse
+* Nur möglich für Variable vom Typ einer konkreten Klasse
 --
 
 == Mögliche Optimierung: Heap Flattening
